@@ -64,7 +64,7 @@ class AuthController extends Controller
         } else {
             return response()->json([
                 'message' => 'username atau password salah'
-            ]);
+            ], 401);
         };
     }
 }
