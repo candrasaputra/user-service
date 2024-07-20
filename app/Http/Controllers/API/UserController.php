@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Validator;
+use Hash;
 
 class UserController extends Controller
 {
@@ -101,6 +102,45 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'username berhasil diperbarui'
+        ]);
+    }
+
+    public function deleteUser($id, Request $request) {
+        $idValidator = Validator::make(['id' => $id], [
+            'id' => 'required|integer|exists:users,id',
+        ]);
+
+        // Validate the request body
+        $bodyValidator = Validator::make($request->all(), [
+            'confirm_password' => 'required|min:8|max:100',
+        ]);
+
+        if ($bodyValidator->fails()) {
+            return response()->json([
+                'message' => 'Invalid input',
+                'validations' => $bodyValidator->errors()
+            ], 400);
+        }
+    
+        // Get the authenticated user
+        $authenticatedUser = $request->user();
+
+        // Find the user by ID
+        $user = User::findOrFail($id);
+
+        // Check if the provided confirm_password matches the user's password
+        if (!Hash::check($request->confirm_password, $user->password)) {
+            return response()->json([
+                'message' => 'Invalid input',
+                'validations' => 'The provided password does not match our records.'
+            ], 400);
+        }
+
+        // Delete the user
+        $user->delete();
+    
+        return response()->json([
+            'message' => 'password berhasil dihapus'
         ]);
     }
 }

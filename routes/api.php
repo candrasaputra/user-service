@@ -19,10 +19,11 @@ use App\Http\Controllers\API\UserController;
 Route::post('login', [AuthController::class, 'login']);
 
 // user
+Route::post('users', [UserController::class, 'createUser'])->middleware(['auth:sanctum']);
 Route::get('users', [UserController::class, 'getUsers'])->middleware(['auth:sanctum']);
 Route::get('users/{id}', [UserController::class, 'getUser'])->middleware(['auth:sanctum']);
 Route::patch('users/{id}', [UserController::class, 'updateUser'])->middleware(['auth:sanctum']);
-Route::post('users', [UserController::class, 'createUser'])->middleware(['auth:sanctum']);
+Route::delete('users/{id}', [UserController::class, 'deleteUser'])->middleware(['auth:sanctum']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
