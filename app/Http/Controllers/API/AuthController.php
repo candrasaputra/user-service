@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function register(Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required',
+            'username' => 'required',
             'password' => 'required',
             'confirm_password' => 'required|same:password'
         ]);
@@ -42,7 +42,7 @@ class AuthController extends Controller
 
     public function login(Request $request) {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|min:4|max:100',
+            'username' => 'required|min:4|max:100',
             'password' => 'required|min:8|max:100'
         ]);
 
@@ -53,7 +53,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $user = Auth::user();
 
             $success['token'] = $user->createToken('auth_token')->plainTextToken;
