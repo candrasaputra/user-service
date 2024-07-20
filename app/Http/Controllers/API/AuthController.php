@@ -20,7 +20,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Invalid input',
                 'validations' => $validator->errors()
-            ]);
+            ], 400);
         }
 
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
