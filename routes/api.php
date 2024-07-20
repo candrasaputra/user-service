@@ -16,13 +16,12 @@ use App\Http\Controllers\API\UserController;
 |
 */
 
-Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 // user
-Route::get('users', [UserController::class, 'getUsers']);
-
-Route::get('users/{id}', [UserController::class, 'getUser']);
+Route::get('users', [UserController::class, 'getUsers'])->middleware(['auth:sanctum']);
+Route::get('users/{id}', [UserController::class, 'getUser'])->middleware(['auth:sanctum']);
+Route::post('users', [UserController::class, 'createUser'])->middleware(['auth:sanctum']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
