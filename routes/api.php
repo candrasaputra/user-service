@@ -24,8 +24,4 @@ Route::get('users', [UserController::class, 'getUsers'])->middleware(['auth:sanc
 Route::get('users/{id}', [UserController::class, 'getUser'])->middleware(['auth:sanctum']);
 Route::patch('users/{id}', [UserController::class, 'updateUser'])->middleware(['auth:sanctum']);
 Route::patch('users/{id}/update-password', [UserController::class, 'updatePassword'])->middleware(['auth:sanctum']);
-Route::delete('users/{id}', [UserController::class, 'deleteUser'])->middleware(['auth:sanctum']);
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::delete('users/{id}/delete-password', [UserController::class, 'deletePassword'])->middleware(['auth:sanctum']);

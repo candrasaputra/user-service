@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Validator;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -56,7 +56,7 @@ class UserController extends Controller
         }
 
         $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
+        $input['password'] = Hash::make($input['password']);
         $input['created_by'] = $authenticatedUser->id;
         $user = User::create($input);
 
@@ -133,7 +133,7 @@ class UserController extends Controller
         $authenticatedUser = $request->user();
 
         $input = $request->only(['password']);
-        $input['password'] = bcrypt($input['password']);
+        $input['password'] = Hash::make($input['password']);
         $input['updated_by'] = $authenticatedUser->id;
         // Find the user by ID
         $user = User::findOrFail($id);
@@ -146,10 +146,17 @@ class UserController extends Controller
         ]);
     }
 
-    public function deleteUser($id, Request $request) {
+    public function deletePassword($id, Request $request) {
         $idValidator = Validator::make(['id' => $id], [
             'id' => 'required|integer|exists:users,id',
         ]);
+
+        if ($idValidator->fails()) {
+            return response()->json([
+                'message' => 'Invalid input',
+                'validations' => $idValidator->errors()
+            ], 400);
+        }
 
         // Validate the request body
         $bodyValidator = Validator::make($request->all(), [
@@ -169,17 +176,23 @@ class UserController extends Controller
         // Find the user by ID
         $user = User::findOrFail($id);
 
+        $input = $request->only(['confirm_password']);
+
         // Check if the provided confirm_password matches the user's password
-        if (!Hash::check($request->confirm_password, $user->password)) {
+        if (!Hash::check($input['confirm_password'], $user->password)) {
             return response()->json([
                 'message' => 'Invalid input',
-                'validations' => 'The provided password does not match our records.'
+                'validations' => [
+                    'confirm_password' => ['The provided password does not match our records.']
+                ]
             ], 400);
         }
 
         // Delete the user
-        $user->delete();
-    
+        $user->update([
+            'password' => null
+        ]);
+
         return response()->json([
             'message' => 'password berhasil dihapus'
         ]);
