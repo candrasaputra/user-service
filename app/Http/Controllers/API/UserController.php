@@ -92,7 +92,7 @@ class UserController extends Controller
         // Get the authenticated user
         $authenticatedUser = $request->user();
 
-        $input = $request->all();
+        $input = $request->only(['name', 'username']);;
         $input['updated_by'] = $authenticatedUser->id;
         // Find the user by ID
         $user = User::findOrFail($id);
@@ -102,6 +102,47 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'username berhasil diperbarui'
+        ]);
+    }
+
+    public function updatePassword($id, Request $request) {
+        $idValidator = Validator::make(['id' => $id], [
+            'id' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($idValidator->fails()) {
+            return response()->json([
+                'message' => 'Invalid input',
+                'validations' => $idValidator->errors()
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|min:8|max:100',
+            'confirm_password' => 'required|same:password|min:8|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid input',
+                'validations' => $validator->errors()
+            ], 400);
+        }
+
+        // Get the authenticated user
+        $authenticatedUser = $request->user();
+
+        $input = $request->only(['password']);
+        $input['password'] = bcrypt($input['password']);
+        $input['updated_by'] = $authenticatedUser->id;
+        // Find the user by ID
+        $user = User::findOrFail($id);
+
+        // Update the user
+        $user->update($input);
+
+        return response()->json([
+            'message' => 'password berhasil diperbarui'
         ]);
     }
 
