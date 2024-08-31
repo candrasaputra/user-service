@@ -6,9 +6,9 @@
 DB_CONNECTION=pgsql
 DB_HOST=db
 DB_PORT=5432
-DB_DATABASE=your_database
-DB_USERNAME=your_user
-DB_PASSWORD=your_password
+DB_DATABASE=testing
+DB_USERNAME=pguser
+DB_PASSWORD=pgpassword
 ```
 2. Build and Run the Docker Containers
 ```
@@ -31,4 +31,9 @@ Open your browser and navigate to http://localhost to see your Laravel applicati
 ### Run testing
 ```
 docker-compose exec app php artisan test
+
+Or
+
+php artisan test --coverage
 ```
+![Image description](/coverage.png){ width=65%; style="display:block; margin-left:auto; margin-right:auto }

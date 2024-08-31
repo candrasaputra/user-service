@@ -31,9 +31,9 @@ services:
     image: postgres:13
     container_name: postgres
     environment:
-      POSTGRES_DB: your_database
-      POSTGRES_USER: your_user
-      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: testing
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

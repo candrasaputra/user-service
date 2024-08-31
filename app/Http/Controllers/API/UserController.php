@@ -7,11 +7,21 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Validator;
 use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
+use InvalidArgumentException;
+use Exception;
 
 class UserController extends Controller
 {
+    private $userService;
+
+    public function __construct(UserService $userService) {
+        $this->userService = $userService;
+    }
+
     public function getUsers(Request $request) {
-        $user = User::all();
+
+        $user = $this->userService->getUsers();
 
         return response()->json([
             'data' => $user
@@ -19,182 +29,82 @@ class UserController extends Controller
     }
 
     public function getUser($id) {
-        $idValidator = Validator::make(['id' => $id], [
-            'id' => 'required|integer|exists:users,id',
-        ]);
+        $status = 200;
 
-        if ($idValidator->fails()) {
-            return response()->json([
+        try {
+            $result['data'] = $this->userService->getUser($id);
+        } catch (InvalidArgumentException $e) {
+            $status = 400;
+            $result = [
                 'message' => 'Invalid input',
-                'validations' => $idValidator->errors()
-            ], 400);
+                'validations' => json_decode($e->getMessage())
+            ];
         }
 
-        $user = User::find($id);
-
-        return response()->json([
-            'data' => $user
-        ]);
+        return response()->json($result, $status);
     }
 
     public function createUser(Request $request) {
-        // Get the authenticated user
-        $authenticatedUser = $request->user();
+        $status = 200;
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|min:4|max:100',
-            'username' => 'required|min:4|max:100|unique:users',
-            'password' => 'required|min:8|max:100',
-            'confirm_password' => 'required|same:password|min:8|max:100'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
+        try {
+            $result['message'] = $this->userService->createUser($request);
+        } catch (InvalidArgumentException $e) {
+            $status = 400;
+            $result = [
                 'message' => 'Invalid input',
-                'validations' => $validator->errors()
-            ], 400);
+                'validations' => json_decode($e->getMessage())
+            ];
         }
 
-        $input = $request->all();
-        $input['password'] = Hash::make($input['password']);
-        $input['created_by'] = $authenticatedUser->id;
-        $user = User::create($input);
-
-        return response()->json([
-            'message' => 'username berhasil disimpan'
-        ]);
+        return response()->json($result, $status);
     }
 
     public function updateUser($id, Request $request) {
-        $idValidator = Validator::make(['id' => $id], [
-            'id' => 'required|integer|exists:users,id',
-        ]);
+        $status = 200;
 
-        if ($idValidator->fails()) {
-            return response()->json([
+        try {
+            $result['message'] = $this->userService->updateUser($id, $request);
+        } catch (InvalidArgumentException $e) {
+            $status = 400;
+            $result = [
                 'message' => 'Invalid input',
-                'validations' => $idValidator->errors()
-            ], 400);
+                'validations' => json_decode($e->getMessage())
+            ];
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|min:4|max:100',
-            'username' => 'required|min:4|max:100'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Invalid input',
-                'validations' => $validator->errors()
-            ], 400);
-        }
-
-        // Get the authenticated user
-        $authenticatedUser = $request->user();
-
-        $input = $request->only(['name', 'username']);;
-        $input['updated_by'] = $authenticatedUser->id;
-        // Find the user by ID
-        $user = User::findOrFail($id);
-
-        // Update the user
-        $user->update($input);
-
-        return response()->json([
-            'message' => 'username berhasil diperbarui'
-        ]);
+        return response()->json($result, $status);
     }
 
     public function updatePassword($id, Request $request) {
-        $idValidator = Validator::make(['id' => $id], [
-            'id' => 'required|integer|exists:users,id',
-        ]);
+        $status = 200;
 
-        if ($idValidator->fails()) {
-            return response()->json([
+        try {
+            $result['message'] = $this->userService->updatePassword($id, $request);
+        } catch (InvalidArgumentException $e) {
+            $status = 400;
+            $result = [
                 'message' => 'Invalid input',
-                'validations' => $idValidator->errors()
-            ], 400);
+                'validations' => json_decode($e->getMessage())
+            ];
         }
 
-        $validator = Validator::make($request->all(), [
-            'password' => 'required|min:8|max:100',
-            'confirm_password' => 'required|same:password|min:8|max:100'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Invalid input',
-                'validations' => $validator->errors()
-            ], 400);
-        }
-
-        // Get the authenticated user
-        $authenticatedUser = $request->user();
-
-        $input = $request->only(['password']);
-        $input['password'] = Hash::make($input['password']);
-        $input['updated_by'] = $authenticatedUser->id;
-        // Find the user by ID
-        $user = User::findOrFail($id);
-
-        // Update the user
-        $user->update($input);
-
-        return response()->json([
-            'message' => 'password berhasil diperbarui'
-        ]);
+        return response()->json($result, $status);
     }
 
     public function deletePassword($id, Request $request) {
-        $idValidator = Validator::make(['id' => $id], [
-            'id' => 'required|integer|exists:users,id',
-        ]);
+        $status = 200;
 
-        if ($idValidator->fails()) {
-            return response()->json([
+        try {
+            $result['message'] = $this->userService->deletePassword($id, $request);
+        } catch (InvalidArgumentException $e) {
+            $status = 400;
+            $result = [
                 'message' => 'Invalid input',
-                'validations' => $idValidator->errors()
-            ], 400);
+                'validations' => json_decode($e->getMessage())
+            ];
         }
 
-        // Validate the request body
-        $bodyValidator = Validator::make($request->all(), [
-            'confirm_password' => 'required|min:8|max:100',
-        ]);
-
-        if ($bodyValidator->fails()) {
-            return response()->json([
-                'message' => 'Invalid input',
-                'validations' => $bodyValidator->errors()
-            ], 400);
-        }
-    
-        // Get the authenticated user
-        $authenticatedUser = $request->user();
-
-        // Find the user by ID
-        $user = User::findOrFail($id);
-
-        $input = $request->only(['confirm_password']);
-
-        // Check if the provided confirm_password matches the user's password
-        if (!Hash::check($input['confirm_password'], $user->password)) {
-            return response()->json([
-                'message' => 'Invalid input',
-                'validations' => [
-                    'confirm_password' => ['The provided password does not match our records.']
-                ]
-            ], 400);
-        }
-
-        // Delete the user
-        $user->update([
-            'password' => null
-        ]);
-
-        return response()->json([
-            'message' => 'password berhasil dihapus'
-        ]);
+        return response()->json($result, $status);
     }
 }

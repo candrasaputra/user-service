@@ -195,6 +195,37 @@ class UserTest extends TestCase
     /**
      * @group updateUser
      */
+    public function test_update_user_fails_due_to_username_has_been_taken(): void
+    {
+        $this->seed([UserSeeder::class]);
+        $user = User::where('username', 'testing1user')->first();
+
+        $token = $user->createToken('TestToken')->plainTextToken;
+    
+        $response = $this->patch("/api/users/$user->id",
+            [
+                'name' => 'testing 2 user',
+                'username' => 'testing2user'
+            ],
+            [
+                'Authorization' => "Bearer $token"
+            ]
+        );
+
+        $response->assertStatus(400);
+        $response->assertJson([
+            'message' => 'Invalid input',
+            'validations' => [
+                "username" => [
+                    "The username has already been taken."
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * @group updateUser
+     */
     public function test_update_user_fails_due_to_invalid_user(): void
     {
         $this->seed([UserSeeder::class]);
@@ -445,7 +476,7 @@ class UserTest extends TestCase
             'Authorization' => "Bearer $token"
             ]
         );
-        
+
         $response->assertStatus(400);
         $response->assertJson([
             'message' => 'Invalid input',
